@@ -9,33 +9,39 @@ class FileChooserWindow(Gtk.Window):
         Gtk.Window.__init__(self, title="FileChooser Example")
 
         box = Gtk.Box(spacing=6)
-        self.add(box)
+        self.set_child(box)
 
         button1 = Gtk.Button(label="Choose File")
         button1.connect("clicked", self.on_file_clicked)
-        box.add(button1)
+        box.append(button1)
 
         button2 = Gtk.Button(label="Choose Folder")
         button2.connect("clicked", self.on_folder_clicked)
-        box.add(button2)
+        box.append(button2)
 
     def on_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog(
-            title="Please choose a file", parent=self, action=Gtk.FileChooserAction.OPEN
+            title="Please choose a file",
+            transient_for=self,
+            modal=True,
+            action=Gtk.FileChooserAction.OPEN
         )
         dialog.add_buttons(
-            Gtk.STOCK_CANCEL,
+            "Cancel",
             Gtk.ResponseType.CANCEL,
-            Gtk.STOCK_OPEN,
-            Gtk.ResponseType.OK,
+            "Open",
+            Gtk.ResponseType.OK
         )
 
         self.add_filters(dialog)
 
-        response = dialog.run()
+        dialog.connect("response", self.on_file_chooser_response)
+        dialog.show()
+
+    def on_file_chooser_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
             print("Open clicked")
-            print("File selected: " + dialog.get_filename())
+            print("File selected: " + dialog.get_file().get_basename())
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
 
@@ -60,25 +66,39 @@ class FileChooserWindow(Gtk.Window):
     def on_folder_clicked(self, widget):
         dialog = Gtk.FileChooserDialog(
             title="Please choose a folder",
-            parent=self,
+            transient_for=self,
+            modal=True,
             action=Gtk.FileChooserAction.SELECT_FOLDER,
         )
         dialog.add_buttons(
-            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Select",
+            Gtk.ResponseType.OK
         )
         dialog.set_default_size(800, 400)
 
-        response = dialog.run()
+        dialog.connect("response", self.on_folder_chooser_response)
+        dialog.show()
+
+    def on_folder_chooser_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
             print("Select clicked")
-            print("Folder selected: " + dialog.get_filename())
+            print("Folder selected: " + dialog.get_file().get_basename())
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
 
         dialog.destroy()
 
 
-win = FileChooserWindow()
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = FileChooserWindow()
+    win.connect("destroy", lambda b: app.quit())
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
