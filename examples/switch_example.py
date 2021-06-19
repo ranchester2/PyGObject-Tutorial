@@ -7,20 +7,20 @@ from gi.repository import Gtk
 class SwitcherWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Switch Demo")
-        self.set_border_width(10)
 
-        hbox = Gtk.Box(spacing=6)
-        self.add(hbox)
+        hbox = Gtk.Box(spacing=6, margin_start=10, margin_end=10,
+                       margin_top=10, margin_bottom=10)
+        self.set_child(hbox)
 
-        switch = Gtk.Switch()
+        switch = Gtk.Switch(hexpand=True)
         switch.connect("notify::active", self.on_switch_activated)
         switch.set_active(False)
-        hbox.pack_start(switch, True, True, 0)
+        hbox.append(switch)
 
-        switch = Gtk.Switch()
+        switch = Gtk.Switch(hexpand=True)
         switch.connect("notify::active", self.on_switch_activated)
         switch.set_active(True)
-        hbox.pack_start(switch, True, True, 0)
+        hbox.append(switch)
 
     def on_switch_activated(self, switch, gparam):
         if switch.get_active():
@@ -30,7 +30,14 @@ class SwitcherWindow(Gtk.Window):
         print("Switch was turned", state)
 
 
-win = SwitcherWindow()
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = SwitcherWindow()
+    win.connect("destroy", app.quit)
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
