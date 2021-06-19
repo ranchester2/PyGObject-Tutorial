@@ -10,27 +10,30 @@ class LabelWindow(Gtk.Window):
 
         hbox = Gtk.Box(spacing=10)
         hbox.set_homogeneous(False)
-        vbox_left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox_left = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL, spacing=10, hexpand=True)
         vbox_left.set_homogeneous(False)
-        vbox_right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox_right = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL, spacing=10, hexpand=True)
         vbox_right.set_homogeneous(False)
 
-        hbox.pack_start(vbox_left, True, True, 0)
-        hbox.pack_start(vbox_right, True, True, 0)
+        hbox.append(vbox_left)
+        hbox.append(vbox_right)
 
-        label = Gtk.Label(label="This is a normal label")
-        vbox_left.pack_start(label, True, True, 0)
+        label = Gtk.Label(label="This is a normal label", vexpand=True)
+        vbox_left.append(label)
 
-        label = Gtk.Label()
+        label = Gtk.Label(vexpand=True)
         label.set_text("This is a left-justified label.\nWith multiple lines.")
         label.set_justify(Gtk.Justification.LEFT)
-        vbox_left.pack_start(label, True, True, 0)
+        vbox_left.append(label)
 
         label = Gtk.Label(
-            label="This is a right-justified label.\nWith multiple lines."
+            label="This is a right-justified label.\nWith multiple lines.",
+            vexpand=True
         )
         label.set_justify(Gtk.Justification.RIGHT)
-        vbox_left.pack_start(label, True, True, 0)
+        vbox_left.append(label)
 
         label = Gtk.Label(
             label="This is an example of a line-wrapped label.  It "
@@ -39,11 +42,12 @@ class LabelWindow(Gtk.Window):
             "wraps the words to fit.\n"
             "     It supports multiple paragraphs correctly, "
             "and  correctly   adds "
-            "many          extra  spaces. "
+            "many          extra  spaces. ",
+            vexpand=True
         )
-        label.set_line_wrap(True)
+        label.set_wrap(True)
         label.set_max_width_chars(32)
-        vbox_right.pack_start(label, True, True, 0)
+        vbox_right.append(label)
 
         label = Gtk.Label(
             label="This is an example of a line-wrapped, filled label. "
@@ -55,38 +59,47 @@ class LabelWindow(Gtk.Window):
             "    This is a new paragraph.\n"
             "    This is another newer, longer, better "
             "paragraph.  It is coming to an end, "
-            "unfortunately."
+            "unfortunately.",
+            vexpand=True
         )
-        label.set_line_wrap(True)
+        label.set_wrap(True)
         label.set_justify(Gtk.Justification.FILL)
         label.set_max_width_chars(32)
-        vbox_right.pack_start(label, True, True, 0)
+        vbox_right.append(label)
 
-        label = Gtk.Label()
+        label = Gtk.Label(vexpand=True)
         label.set_markup(
             "Text can be <small>small</small>, <big>big</big>, "
             "<b>bold</b>, <i>italic</i> and even point to "
             'somewhere in the <a href="https://www.gtk.org" '
             'title="Click to find out more">internets</a>.'
         )
-        label.set_line_wrap(True)
+        label.set_wrap(True)
         label.set_max_width_chars(48)
-        vbox_left.pack_start(label, True, True, 0)
+        vbox_left.append(label)
 
         label = Gtk.Label.new_with_mnemonic(
             "_Press Alt + P to select button to the right"
         )
-        vbox_left.pack_start(label, True, True, 0)
+        label.set_vexpand(True)
+        vbox_left.append(label)
         label.set_selectable(True)
 
-        button = Gtk.Button(label="Click at your own risk")
+        button = Gtk.Button(label="Click at your own risk", vexpand=True)
         label.set_mnemonic_widget(button)
-        vbox_right.pack_start(button, True, True, 0)
+        vbox_right.append(button)
 
-        self.add(hbox)
+        self.set_child(hbox)
 
 
-window = LabelWindow()
-window.connect("destroy", Gtk.main_quit)
-window.show_all()
-Gtk.main()
+def on_activate(app):
+    window = LabelWindow()
+    window.connect("destroy", app.quit)
+    app.add_window(window)
+    window.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
