@@ -52,6 +52,14 @@ a widget, (usually a :class:`Gtk.Label`).
 The "toggled" signal, :meth:`Gtk.ToggleButton.set_active` and
 :meth:`Gtk.ToggleButton.get_active` are inherited.
 
+Example
+^^^^^^^
+
+.. image:: ../images/checkbutton_example.png
+
+.. literalinclude:: ../examples/checkbutton_example.py
+    :linenos:
+
 RadioButton
 -----------
 Like checkboxes, radio buttons also inherit from :class:`Gtk.ToggleButton`,
