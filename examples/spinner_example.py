@@ -8,8 +8,7 @@ class SpinnerAnimation(Gtk.Window):
     def __init__(self):
 
         Gtk.Window.__init__(self, title="Spinner")
-        self.set_border_width(3)
-        self.connect("destroy", Gtk.main_quit)
+        self.connect("destroy", lambda b : self.get_application().quit())
 
         self.button = Gtk.ToggleButton(label="Start Spinning")
         self.button.connect("toggled", self.on_button_toggled)
@@ -17,15 +16,15 @@ class SpinnerAnimation(Gtk.Window):
 
         self.spinner = Gtk.Spinner()
 
-        self.grid = Gtk.Grid()
-        self.grid.add(self.button)
+        self.grid = Gtk.Grid(margin_start=3, margin_end=3,
+                             margin_top=3, margin_bottom=3)
+        self.grid.attach(self.button, 0, 0, 1, 1)
         self.grid.attach_next_to(
             self.spinner, self.button, Gtk.PositionType.BOTTOM, 1, 2
         )
         self.grid.set_row_homogeneous(True)
 
-        self.add(self.grid)
-        self.show_all()
+        self.set_child(self.grid)
 
     def on_button_toggled(self, button):
 
@@ -38,6 +37,13 @@ class SpinnerAnimation(Gtk.Window):
             self.button.set_label("Start Spinning")
 
 
-myspinner = SpinnerAnimation()
+def on_activate(app):
+    myspinner = SpinnerAnimation()
+    app.add_window(myspinner)
+    myspinner.show()
 
-Gtk.main()
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
