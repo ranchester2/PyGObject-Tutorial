@@ -7,22 +7,21 @@ from gi.repository import Gtk
 class ButtonWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Button Demo")
-        self.set_border_width(10)
+        hbox = Gtk.Box(spacing=6, margin_start=10, margin_end=10,
+                       margin_top=10, margin_bottom=10)
+        self.set_child(hbox)
 
-        hbox = Gtk.Box(spacing=6)
-        self.add(hbox)
-
-        button = Gtk.Button.new_with_label("Click Me")
+        button = Gtk.Button(label="Click Me", hexpand=True)
         button.connect("clicked", self.on_click_me_clicked)
-        hbox.pack_start(button, True, True, 0)
+        hbox.append(button)
 
-        button = Gtk.Button.new_with_mnemonic("_Open")
+        button = Gtk.Button(label="_Open", use_underline=True, hexpand=True)
         button.connect("clicked", self.on_open_clicked)
-        hbox.pack_start(button, True, True, 0)
+        hbox.append(button)
 
-        button = Gtk.Button.new_with_mnemonic("_Close")
+        button = Gtk.Button(label="_Close", use_underline=True, hexpand=True)
         button.connect("clicked", self.on_close_clicked)
-        hbox.pack_start(button, True, True, 0)
+        hbox.append(button)
 
     def on_click_me_clicked(self, button):
         print('"Click me" button was clicked')
@@ -32,10 +31,17 @@ class ButtonWindow(Gtk.Window):
 
     def on_close_clicked(self, button):
         print("Closing application")
-        Gtk.main_quit()
+        self.get_application().quit()
 
 
-win = ButtonWindow()
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = ButtonWindow()
+    win.connect("destroy", app.quit)
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
