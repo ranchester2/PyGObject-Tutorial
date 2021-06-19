@@ -7,29 +7,29 @@ from gi.repository import Gtk, GLib
 class SpinnerWindow(Gtk.Window):
     def __init__(self, *args, **kwargs):
         Gtk.Window.__init__(self, title="Spinner Demo")
-        self.set_border_width(10)
 
-        mainBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.add(mainBox)
+        mainBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6,
+                          margin_start=10, margin_end=10, margin_top=10, margin_bottom=10)
+        self.set_child(mainBox)
 
-        self.spinner = Gtk.Spinner()
-        mainBox.pack_start(self.spinner, True, True, 0)
+        self.spinner = Gtk.Spinner(vexpand=True)
+        mainBox.append(self.spinner)
 
-        self.label = Gtk.Label()
-        mainBox.pack_start(self.label, True, True, 0)
+        self.label = Gtk.Label(vexpand=True)
+        mainBox.append(self.label)
 
-        self.entry = Gtk.Entry()
+        self.entry = Gtk.Entry(vexpand=True)
         self.entry.set_text("10")
-        mainBox.pack_start(self.entry, True, True, 0)
+        mainBox.append(self.entry)
 
-        self.buttonStart = Gtk.Button(label="Start timer")
+        self.buttonStart = Gtk.Button(label="Start timer", vexpand=True)
         self.buttonStart.connect("clicked", self.on_buttonStart_clicked)
-        mainBox.pack_start(self.buttonStart, True, True, 0)
+        mainBox.append(self.buttonStart)
 
-        self.buttonStop = Gtk.Button(label="Stop timer")
+        self.buttonStop = Gtk.Button(label="Stop timer", vexpand=True)
         self.buttonStop.set_sensitive(False)
         self.buttonStop.connect("clicked", self.on_buttonStop_clicked)
-        mainBox.pack_start(self.buttonStop, True, True, 0)
+        mainBox.append(self.buttonStop)
 
         self.timeout_id = None
         self.connect("destroy", self.on_SpinnerWindow_destroy)
@@ -48,7 +48,7 @@ class SpinnerWindow(Gtk.Window):
         if self.timeout_id:
             GLib.source_remove(self.timeout_id)
             self.timeout_id = None
-        Gtk.main_quit()
+        self.get_appliation().quit()
 
     def on_timeout(self, *args, **kwargs):
         """ A timeout function.
@@ -84,6 +84,13 @@ class SpinnerWindow(Gtk.Window):
         self.label.set_label(alabeltext)
 
 
-win = SpinnerWindow()
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = SpinnerWindow()
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
