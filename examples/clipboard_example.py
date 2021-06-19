@@ -10,16 +10,16 @@ class ClipboardWindow(Gtk.Window):
 
         grid = Gtk.Grid()
 
-        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        self.clipboard = self.get_clipboard()
         self.entry = Gtk.Entry()
-        self.image = Gtk.Image.new_from_icon_name("process-stop", Gtk.IconSize.MENU)
+        self.image = Gtk.Image.new_from_icon_name("process-stop")
 
         button_copy_text = Gtk.Button(label="Copy Text")
         button_paste_text = Gtk.Button(label="Paste Text")
         button_copy_image = Gtk.Button(label="Copy Image")
         button_paste_image = Gtk.Button(label="Paste Image")
 
-        grid.add(self.entry)
+        grid.attach(self.entry, 0, 0, 1, 1)
         grid.attach(self.image, 0, 1, 1, 1)
         grid.attach(button_copy_text, 1, 0, 1, 1)
         grid.attach(button_paste_text, 2, 0, 1, 1)
@@ -31,31 +31,44 @@ class ClipboardWindow(Gtk.Window):
         button_copy_image.connect("clicked", self.copy_image)
         button_paste_image.connect("clicked", self.paste_image)
 
-        self.add(grid)
+        self.set_child(grid)
 
     def copy_text(self, widget):
-        self.clipboard.set_text(self.entry.get_text(), -1)
+        self.clipboard.set(self.entry.get_text())
 
     def paste_text(self, widget):
-        text = self.clipboard.wait_for_text()
-        if text is not None:
-            self.entry.set_text(text)
-        else:
-            print("No text on the clipboard.")
+        def handle_text(source, result):
+            text = self.clipboard.read_text_finish(result)
+            if text is not None:
+                self.entry.set_text(text)
+            else:
+                print("No text on the clipboard")
+
+        self.clipboard.read_text_async(None, handle_text)
 
     def copy_image(self, widget):
-        if self.image.get_storage_type() == Gtk.ImageType.PIXBUF:
-            self.clipboard.set_image(self.image.get_pixbuf())
+        if self.image.get_storage_type() == Gtk.ImageType.PAINTABLE:
+            self.clipboard.set_texture(self.image.get_paintable())
         else:
             print("No image has been pasted yet.")
 
     def paste_image(self, widget):
-        image = self.clipboard.wait_for_image()
-        if image is not None:
-            self.image.set_from_pixbuf(image)
+        def handle_image(source, result):
+            image = self.clipboard.read_texture_finish(result)
+            if image is not None:
+                self.image.set_from_paintable(image)
+
+        self.clipboard.read_texture_async(None, handle_image)
 
 
-win = ClipboardWindow()
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = ClipboardWindow()
+    win.connect("destroy", lambda b : app.quit())
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
