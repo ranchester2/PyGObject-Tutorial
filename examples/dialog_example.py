@@ -6,9 +6,9 @@ from gi.repository import Gtk
 
 class DialogExample(Gtk.Dialog):
     def __init__(self, parent):
-        Gtk.Dialog.__init__(self, title="My Dialog", transient_for=parent, flags=0)
+        Gtk.Dialog.__init__(self, title="My Dialog", transient_for=parent, modal=True)
         self.add_buttons(
-            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK
+            "_Cancel", Gtk.ResponseType.CANCEL, "_OK", Gtk.ResponseType.OK
         )
 
         self.set_default_size(150, 100)
@@ -16,25 +16,26 @@ class DialogExample(Gtk.Dialog):
         label = Gtk.Label(label="This is a dialog to display additional information")
 
         box = self.get_content_area()
-        box.add(label)
-        self.show_all()
+        box.append(label)
 
 
 class DialogWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Dialog Example")
 
-        self.set_border_width(6)
-
-        button = Gtk.Button(label="Open dialog")
+        button = Gtk.Button(label="Open dialog", margin_start=6,
+                            margin_end=6, margin_top=6, margin_bottom=6)
         button.connect("clicked", self.on_button_clicked)
 
-        self.add(button)
+        self.set_child(button)
 
     def on_button_clicked(self, widget):
         dialog = DialogExample(self)
-        response = dialog.run()
 
+        dialog.connect("response", self.on_dialog_response)
+        dialog.show()
+
+    def on_dialog_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
             print("The OK button was clicked")
         elif response == Gtk.ResponseType.CANCEL:
@@ -43,7 +44,14 @@ class DialogWindow(Gtk.Window):
         dialog.destroy()
 
 
-win = DialogWindow()
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = DialogWindow()
+    win.connect("destroy", lambda b: app.quit())
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
