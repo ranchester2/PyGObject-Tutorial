@@ -10,14 +10,19 @@ class Window1(Gtk.Window):
 
     @Gtk.Template.Callback()
     def onDestroy(self, *args):
-        Gtk.main_quit()
+        self.get_application().quit()
 
     @Gtk.Template.Callback()
-    def onButtonPressed(self, button):
+    def onButtonClicked(self, button):
         print("Hello World!")
 
 
-window = Window1()
-window.show()
+def on_activate(app):
+    window = Window1()
+    app.add_window(window)
+    window.show()
 
-Gtk.main()
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+app.run(None)
