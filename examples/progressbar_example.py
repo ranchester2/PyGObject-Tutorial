@@ -7,25 +7,25 @@ from gi.repository import Gtk, GLib
 class ProgressBarWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="ProgressBar Demo")
-        self.set_border_width(10)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.add(vbox)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6,
+                       margin_start=10, margin_end=10, margin_top=10, margin_bottom=10)
+        self.set_child(vbox)
 
-        self.progressbar = Gtk.ProgressBar()
-        vbox.pack_start(self.progressbar, True, True, 0)
+        self.progressbar = Gtk.ProgressBar(vexpand=True)
+        vbox.append(self.progressbar)
 
-        button = Gtk.CheckButton(label="Show text")
+        button = Gtk.CheckButton(label="Show text", vexpand=True)
         button.connect("toggled", self.on_show_text_toggled)
-        vbox.pack_start(button, True, True, 0)
+        vbox.append(button)
 
-        button = Gtk.CheckButton(label="Activity mode")
+        button = Gtk.CheckButton(label="Activity mode", vexpand=True)
         button.connect("toggled", self.on_activity_mode_toggled)
-        vbox.pack_start(button, True, True, 0)
+        vbox.append(button)
 
-        button = Gtk.CheckButton(label="Right to Left")
+        button = Gtk.CheckButton(label="Right to Left", vexpand=True)
         button.connect("toggled", self.on_right_to_left_toggled)
-        vbox.pack_start(button, True, True, 0)
+        vbox.append(button)
 
         self.timeout_id = GLib.timeout_add(50, self.on_timeout, None)
         self.activity_mode = False
@@ -69,7 +69,14 @@ class ProgressBarWindow(Gtk.Window):
         return True
 
 
-win = ProgressBarWindow()
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = ProgressBarWindow()
+    win.connect("destroy", app.quit)
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
