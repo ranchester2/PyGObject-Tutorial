@@ -12,34 +12,34 @@ class EntryWindow(Gtk.Window):
         self.timeout_id = None
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.add(vbox)
+        self.set_child(vbox)
 
         self.entry = Gtk.Entry()
         self.entry.set_text("Hello World")
-        vbox.pack_start(self.entry, True, True, 0)
+        vbox.append(self.entry)
 
-        hbox = Gtk.Box(spacing=6)
-        vbox.pack_start(hbox, True, True, 0)
+        hbox = Gtk.Box(spacing=6, vexpand=True)
+        vbox.append(hbox)
 
-        self.check_editable = Gtk.CheckButton(label="Editable")
+        self.check_editable = Gtk.CheckButton(label="Editable", hexpand=True)
         self.check_editable.connect("toggled", self.on_editable_toggled)
         self.check_editable.set_active(True)
-        hbox.pack_start(self.check_editable, True, True, 0)
+        hbox.append(self.check_editable)
 
-        self.check_visible = Gtk.CheckButton(label="Visible")
+        self.check_visible = Gtk.CheckButton(label="Visible", hexpand=True)
         self.check_visible.connect("toggled", self.on_visible_toggled)
         self.check_visible.set_active(True)
-        hbox.pack_start(self.check_visible, True, True, 0)
+        hbox.append(self.check_visible)
 
-        self.pulse = Gtk.CheckButton(label="Pulse")
+        self.pulse = Gtk.CheckButton(label="Pulse", hexpand=True)
         self.pulse.connect("toggled", self.on_pulse_toggled)
         self.pulse.set_active(False)
-        hbox.pack_start(self.pulse, True, True, 0)
+        hbox.append(self.pulse)
 
-        self.icon = Gtk.CheckButton(label="Icon")
+        self.icon = Gtk.CheckButton(label="Icon", hexpand=True)
         self.icon.connect("toggled", self.on_icon_toggled)
         self.icon.set_active(False)
-        hbox.pack_start(self.icon, True, True, 0)
+        hbox.append(self.icon)
 
     def on_editable_toggled(self, button):
         value = button.get_active()
@@ -72,7 +72,14 @@ class EntryWindow(Gtk.Window):
         self.entry.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, icon_name)
 
 
-win = EntryWindow()
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
-Gtk.main()
+def on_activate(app):
+    win = EntryWindow()
+    win.connect("destroy", lambda b : app.quit())
+    app.add_window(win)
+    win.show()
+
+
+app = Gtk.Application(application_id="org.example.myapp")
+app.connect("activate", on_activate)
+
+app.run(None)
